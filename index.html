@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+</head>
+<body>
+<div style="margin:0 auto; width:1000px; height:800px; border:1px solid #ccc;">
+	<canvas id="myCanvas" width="1000" height="800"></canvas>
+</div>
+
+<script type="text/javascript">
+
+var colorArr = ["#789", "#abcdef", "#cff", "#9cf", "#99f", "#90f", "#3ff", "#009", "#606", "#f69", "#c66", "#963", "#c9c", "#360", "#693", "#036"];
+
+//扇形
+CanvasRenderingContext2D.prototype.sector = function (x, y, radius, sDeg, eDeg) {
+	// 初始保存
+	this.save();
+	// 位移到目标点
+	this.translate(x, y);
+	this.beginPath();
+	// 画出圆弧
+	this.arc(0,0,radius,sDeg, eDeg);
+	// 再次保存以备旋转
+	this.save();
+	// 旋转至起始角度
+	this.rotate(eDeg);
+	// 移动到终点，准备连接终点与圆心
+	this.moveTo(radius,0);
+	// 连接到圆心
+	this.lineTo(0,0);
+	// 还原
+	this.restore();
+	// 旋转至起点角度
+	this.rotate(sDeg);
+	// 从圆心连接到起点
+	this.lineTo(radius,0);
+	this.closePath();
+	// 还原到最初保存的状态
+	this.restore();
+	return this;
+}
+
+//	返回数组的最大值
+Array.prototype.Max = function(){
+	return Math.max.apply(null, this);
+}
+
+
+// 折线图
+function LineChart(data){
+	var XNumber = data.datasets[0].data.length;	// X轴的点数（竖线的个数）
+	var canvas = document.getElementById("myCanvas");
+	var height = data.height/13;
+	var ctx = canvas.getContext("2d"); 
+	ctx.strokeStyle="#f3f3f3";
+	
+	//	绘制竖线（竖线个数等于数据的个数）
+	for (var i=0; i<XNumber; i++){
+		var w = (800/XNumber) * i + 180;
+		ctx.moveTo(w,50);
+		ctx.lineTo(w,700);
+		ctx.textAlign = "center";
+		ctx.fillText(data.labels[i],w,720);
+	}
+	
+	//	绘制横线
+	for (var i=14; i>0; i--){
+		ctx.moveTo(180,50*i);
+		ctx.lineTo(180+ 800/XNumber*(XNumber-1),50*i);
+		ctx.textAlign = "right";
+		ctx.fillText(Math.floor((14-i)*height),175,50*i+3);
+	}
+	ctx.stroke();
+	
+	
+	// 绘制折线并添加数据
+	for (var i=0; i<data.datasets.length; i++){
+		ctx.beginPath();
+		ctx.strokeStyle = colorArr[i];
+		for (var j=0; j<XNumber; j++){
+			var w = (800/XNumber) * j + 180;
+			
+			// 绘制折线
+			if (j == 0){
+				ctx.moveTo(w, Math.floor(700-650/data.height*data.datasets[i].data[j]));
+			}else{
+				ctx.lineTo(w, Math.floor(700-650/data.height*data.datasets[i].data[j]));
+			}
+			ctx.textAlign = "left";
+			ctx.fillStyle = "#f00";
+			
+			// 添加数据
+			ctx.fillText(data.datasets[i].data[j], w, Math.floor(700-650/data.height*data.datasets[i].data[j]));
+		}
+		
+		ctx.fillStyle = "#000";
+		ctx.fillText(data.datasets[i].title, (800/XNumber) * (XNumber-1) + 200, Math.floor(700-650/data.height*data.datasets[i].data[XNumber-1]));
+		ctx.stroke();
+	}
+	
+	
+	
+	
+}
+
+var lineData = {
+	labels : ["一月","二月","三月","四月","五月","六月","七月"],
+	datasets : [
+		{
+			title: "2016年",
+			data : [65,59,90,81,56,55,40]
+		},
+		{
+			title: "2017年",
+			data : [28,48,40,19,96,27,100]
+		}
+	],
+	height: 120
+};
+
+BarChart(lineData);
+
+
+// 饼状图
+function PieChart(data){
+	
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+	var pre = 0;
+	var count = 0;
+	for (items in data){
+		count += data[items];
+		ctx.fillStyle=colorArr.shift();
+		ctx.sector(500,400,350,2*Math.PI*pre,2*Math.PI*count).fill();
+		
+		ctx.fillStyle="#000";
+		
+		// 填充文字
+		ctx.fillText(items+":"+data[items], 500+300*Math.cos(2*Math.PI*(pre+data[items]/2)), 400+300*Math.sin(2*Math.PI*(pre+data[items]/2)));
+		pre = count;
+	}
+}
+
+
+// 柱状图
+function BarChart(data){
+	var XNumber = data.datasets[0].data.length+1;	// X轴的点数（竖线的个数）
+	var canvas = document.getElementById("myCanvas");
+	var height = data.height/13;
+	var ctx = canvas.getContext("2d"); 
+	ctx.strokeStyle="#f3f3f3";
+	
+	//	绘制竖线（竖线个数等于数据的个数）
+	for (var i=0; i<XNumber; i++){
+		var w = (800/XNumber) * i + 180;
+		ctx.moveTo(w,50);
+		ctx.lineTo(w,700);
+		if (i != 0){
+			ctx.textAlign = "center";
+			ctx.fillText(data.labels[i-1],w-(400/XNumber),720);
+		}
+	}
+	
+	//	绘制横线
+	for (var i=14; i>0; i--){
+		ctx.moveTo(180,50*i);
+		ctx.lineTo(180+800/XNumber*(XNumber-1),50*i);
+		ctx.textAlign = "right";
+		ctx.fillText(Math.floor((14-i)*height),175,50*i+3);
+	}
+	
+	ctx.stroke();
+	
+	// 绘制柱状图并添加数据
+	for (var i=0; i<data.datasets.length; i++){
+		ctx.beginPath();
+		ctx.fillStyle = colorArr[i];
+		for (var j=0; j<XNumber; j++){
+			var RectWidth = 800/XNumber/(data.datasets.length+1);	//	矩形的宽度
+			
+			var w = (800/XNumber) * j + 180;
+			// 矩形的Y轴
+			var h = Math.floor(700-650/data.height*data.datasets[i].data[j]); 
+			
+			// 绘制折线
+			ctx.textAlign = "center";
+			
+			ctx.fillRect(w+RectWidth*0.5+RectWidth*i, h, RectWidth, 700-h);
+			
+			// 添加数据
+			ctx.fillText(data.datasets[i].data[j], w+RectWidth*(i+1), h-3);
+		}
+		
+	}
+	
+	
+	ctx.stroke();
+}
+
+
+// 环形图
+function DoughnutChart(data){
+	
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+	var pre = 0;
+	var count = 0;
+	for (items in data){
+		count += data[items];
+		console.log("  pre:"+pre);
+		console.log("count:"+count);
+		ctx.fillStyle=colorArr.shift();
+		ctx.sector(500,400,350,2*Math.PI*pre,2*Math.PI*count).fill();
+		
+		ctx.fillStyle="#000";
+		
+		
+		// 填充文字
+		ctx.fillText(items+":"+data[items],500+300*Math.cos(2*Math.PI*(pre+data[items]/2)),400+300*Math.sin(2*Math.PI*(pre+data[items]/2)));
+		pre = count;
+	}
+	
+	ctx.beginPath();
+	ctx.fillStyle="#fff";
+	ctx.arc(500,400,230,0,Math.PI*2);
+	ctx.strokeStyle="#fff";
+	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+	
+	
+}
+
+
+//	环形图和饼状图的数据格式
+//	var arr = {"一月":0.2,"二月":0.18,"三月":0.23,"四月":0.12,"五月":0.27};
+
+
+
+</script>
+</body>
+</html>
