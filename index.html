@@ -2,11 +2,20 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>无标题文档</title>
+<title>Canvas-Chart</title>
 </head>
 <body>
 <div style="margin:0 auto; width:1000px; height:800px; border:1px solid #ccc;">
 	<canvas id="myCanvas" width="1000" height="800"></canvas>
+</div>
+<div style="margin:0 auto; width:1000px; height:800px; border:1px solid #ccc;">
+	<canvas id="myCanvas1" width="1000" height="800"></canvas>
+</div>
+<div style="margin:0 auto; width:1000px; height:800px; border:1px solid #ccc;">
+	<canvas id="myCanvas2" width="1000" height="800"></canvas>
+</div>
+<div style="margin:0 auto; width:1000px; height:800px; border:1px solid #ccc;">
+	<canvas id="myCanvas3" width="1000" height="800"></canvas>
 </div>
 
 <script type="text/javascript">
@@ -119,14 +128,14 @@ var lineData = {
 	],
 	height: 120
 };
-
+LineChart(lineData)
 BarChart(lineData);
 
 
 // 饼状图
 function PieChart(data){
 	
-	var canvas = document.getElementById("myCanvas");
+	var canvas = document.getElementById("myCanvas1");
 	var ctx = canvas.getContext("2d");
 	var pre = 0;
 	var count = 0;
@@ -147,7 +156,7 @@ function PieChart(data){
 // 柱状图
 function BarChart(data){
 	var XNumber = data.datasets[0].data.length+1;	// X轴的点数（竖线的个数）
-	var canvas = document.getElementById("myCanvas");
+	var canvas = document.getElementById("myCanvas2");
 	var height = data.height/13;
 	var ctx = canvas.getContext("2d"); 
 	ctx.strokeStyle="#f3f3f3";
@@ -203,7 +212,7 @@ function BarChart(data){
 // 环形图
 function DoughnutChart(data){
 	
-	var canvas = document.getElementById("myCanvas");
+	var canvas = document.getElementById("myCanvas3");
 	var ctx = canvas.getContext("2d");
 	var pre = 0;
 	var count = 0;
@@ -235,9 +244,9 @@ function DoughnutChart(data){
 
 
 //	环形图和饼状图的数据格式
-//	var arr = {"一月":0.2,"二月":0.18,"三月":0.23,"四月":0.12,"五月":0.27};
-
-
+	var arr = {"一月":0.2,"二月":0.18,"三月":0.23,"四月":0.12,"五月":0.27};
+	PieChart(arr)
+	DoughnutChart(arr);
 
 </script>
 </body>
